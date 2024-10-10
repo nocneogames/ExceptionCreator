@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exception Bug Creator</title>
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bold {
+            font-weight: bold;
+        }
+        /* Custom style for output text */
+        #output {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Exception Bug Creator</h1>
+        <!-- Textarea for input -->
+        <div class="mb-3">
+            <label for="inputLog" class="form-label">Place paste the log here:</label>
+            <textarea class="form-control" id="inputLog" rows="5" placeholder="Paste your bug log here..."></textarea>
+        </div>
+        <!-- Button to generate bug -->
+        <button class="btn btn-danger" onclick="parseLog()">Generate BUG</button>
+
+        <!-- Output Section -->
+        <div class="mt-4">
+            <h3>Bug Output:</h3>
+            <pre id="output" class="bg-light p-3 border"></pre>
+        </div>
+    </div>
+
+    <script>
+      function parseLog() {
+            const logText = document.getElementById('inputLog').value;
+            const patterns = {
+                "ExceptionStackTraceHash": /Hash\s*:\s*(.+?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "Code": /Code\s*:\s*(\d+)/,
+                "CreateDate": /CreateDate\s*:\s*(.*?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "Action": /Action\s*:\s*(.*?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "ClassName": /ClassName\s*:\s*(.*?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "MethodName": /MethodName\s*:\s*(.*?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "Application": /(NG_)?Application\s*:\s*(.*?)(?=\r?\n[A-Za-z]+:|\z)/,
+                "Message": /Message\s*:([^]*?)\{\s*\}\}/s
+            };
+ 
+            const results = {};
+            for (const [key, pattern] of Object.entries(patterns)) {
+                const match = logText.match(pattern);
+                if (match) {
+                    results[key] = key === "Application" ? match[2] : match[1];
+                } else {
+                    results[key] = "";
+                }
+            }
+ 
+            let output = "";
+            for (const [key, value] of Object.entries(results)) {
+                if (key === "CreateDate") {
+                    output += `<span class="bold">CreateDate(example)</span>: ${value.trim()}\n`;
+                } else if (key === "Message") {
+                    output += `<span class="bold">Message</span>: Below\n\n${value.trim()}{ }}\n`;
+                } else {
+                    output += `<span class="bold">${key}</span>: ${value.trim()}\n`;
+                }
+            }
+ 
+            document.getElementById('output').innerHTML = output;
+        }
+    </script>
+
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
